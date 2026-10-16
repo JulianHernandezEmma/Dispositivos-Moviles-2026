@@ -39,30 +39,30 @@ class GestorIncidencias {
     for (var i = 0; i < incidencias.length; i++) {
       //si la incidencia que tenemos en cada posición corresponde a la que buscamos
       //se cumple el condicional y entra
-      print(
-          "Que tiene la lista original: ${incidencias.map((x) => '${x.id}:${x.estado}').toList()}"); //Print de prueba para ver que recibe
+      /*print(
+          "Que tiene la lista original: ${incidencias.map((x) => '${x.id}:${x.estado}').toList()}"); //Print de prueba para ver que recibe */
       if (incidencias[i].id == id) {
         //Si coincidió cambia el estado del elemento en la lista en su campo estado
         //al que recibimos en esta función
         //si lo cambia, pero no se guarda el estado para futuras consultas
-        print(
-            "Antes de cambiar estado:  ${incidencias.map((x) => '${x.id}:${x.estado}').toList()}"); //Qué hay antes de cambiar el estado?
+        /*print(
+            "Antes de cambiar estado:  ${incidencias.map((x) => '${x.id}:${x.estado}').toList()}"); //Qué hay antes de cambiar el estado? */
         incidencias[i].estado = estado;
-        print(
-            "Después de cambiar el estado:  ${incidencias.map((x) => '${x.id}:${x.estado}').toList()}"); //Qué hay después de cambiar el estado?
+        /* print(
+            "Después de cambiar el estado:  ${incidencias.map((x) => '${x.id}:${x.estado}').toList()}"); //Qué hay después de cambiar el estado? */
         //rompe la función por que terminó
         break;
       }
     }
     //debemos de guardar la lista de los datos que tenemos
     //actializada con el nuevo estado, no sólo cambiarlo
-    print(
-        "Antes de guardar la nueva lista  ${incidencias.map((x) => '${x.id}:${x.estado}').toList()}"); //Qué hay después de terminar el condicional, si se actualizó?
+   /* print(
+        "Antes de guardar la nueva lista  ${incidencias.map((x) => '${x.id}:${x.estado}').toList()}"); //Qué hay después de terminar el condicional, si se actualizó? */
     await datos.guardar(incidencias);
-    print(
+   /*  print(
         "Después de guardar la lista  ${incidencias.map((x) => '${x.id}:${x.estado}').toList()}"); //se guardó correctamente en la lista?
     print(
-        "Lo que quedó en el almacén: ${(await datos.leer()).map((x) => '${x.id}:${x.estado}').toList()}"); //se guardó correctamente en el almacén?
+        "Lo que quedó en el almacén: ${(await datos.leer()).map((x) => '${x.id}:${x.estado}').toList()}"); //se guardó correctamente en el almacén?*/
   }
 
   Future<void> crear(String titulo, String descripcion, String cliente,
