@@ -3,11 +3,18 @@ import '../model/incidencia.dart';
 
 class GestorIncidencias {
   final AlmacenLocal datos = AlmacenLocal();
+  //lista que guarda la cantidad de incidencias totales
   List<Incidencia> incidencias = [];
+  // variable que calcula cuantas incidencias hay en total
   int cantidadPendientes = 0;
 
+//función que carga los datos cuando arranca la página principal
   Future<void> iniciar() async {
+    //guarda las incidencias que hay en total dentro de la lista que se declaró arriba
     incidencias = await datos.leer();
+    //se calculla cuantas incidencias hay en pendientes
+    //Aqui estaba el error, sólamente lo hacía una sola vez, y sólo al arrancar
+    //la función de iniciar, después ya no volvía calcularlo
     cantidadPendientes =
         incidencias.where((x) => x.estado == 'Pendiente').length;
   }
@@ -53,7 +60,13 @@ class GestorIncidencias {
     return null;
   }
 
+//cuenta la cuantidad de incidencias que hay
+  //Recibe el estado que queremos contar y devuelve cuantas incidencias tienen ese estado
   int contar(String estado) {
+    //Aqui está el error del BUG-003, cuando el estado es Pendiente no cuenta la lista,
+    //sólo regresa el número que se guardó en cantidadPendientes, que se calculó al arrancar
+    //y que cambiarEstado nunca actualiza, por eso se queda en 5 aunque ya pasó una a Resuelta
+    //Los otros dos estados sí se cuentan sobre la lista cada vez, por eso esos sí cambian
     if (estado == 'Pendiente') return cantidadPendientes;
     return incidencias.where((x) => x.estado == estado).length;
   }
@@ -106,6 +119,8 @@ class GestorIncidencias {
       fecha: DateTime.now().toIso8601String().split('T').first,
     );
     incidencias.insert(0, nuevo);
+    //Aqui sí se actualiza el contador a mano, por eso al registrar una incidencia nueva el número
+    //de Pendientes sí sube bien, pero en cambiarEstado no se hace y ahí es donde deja de coincidir
     cantidadPendientes++;
     await datos.guardar(incidencias);
   }
