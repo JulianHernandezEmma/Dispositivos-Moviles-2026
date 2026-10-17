@@ -48,6 +48,18 @@ class GestorIncidencias {
         .toList();
   }
 
+  //Función para la FEAT-002, junta la búsqueda por texto con los filtros de estado y prioridad
+  //Recibe el texto del buscador y lo que se escogió en los dos filtros, si el estado es Todos
+  //o la prioridad es Todas ese filtro no se toma en cuenta
+  List<Incidencia> filtrar(String texto, String estado, String prioridad) {
+    //primero usamos buscar para no repetir lo que se hizo en el bug 2 y a lo que regresa
+    //le quitamos las que no cumplen con el estado y con la prioridad, así se aplican las 3 condiciones
+    return buscar(texto)
+        .where((x) => estado == 'Todos' || x.estado == estado)
+        .where((x) => prioridad == 'Todas' || x.prioridad == prioridad)
+        .toList();
+  }
+
   Incidencia? porId(String id) {
     for (var x in incidencias) {
       if (x.id == id) return x;

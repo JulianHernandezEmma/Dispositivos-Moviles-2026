@@ -16,11 +16,43 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
   bool cargando = true;
   String? error;
   String busqueda = '';
+  //filtros de la FEAT-002, empiezan sin filtrar nada
+  String filtroEstado = 'Todos';
+  String filtroPrioridad = 'Todas';
+  //controlador del buscador, antes no tenía y se necesita para poder borrar el texto con el botón Limpiar
+  final buscador = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     cargar();
+  }
+
+  @override
+  void dispose() {
+    buscador.dispose();
+    super.dispose();
+  }
+
+  //Función del botón Limpiar, regresa el buscador y los dos filtros a como estaban al inicio
+  //para que vuelvan a salir todas las incidencias
+  void limpiarFiltros() {
+    buscador.clear();
+    setState(() {
+      busqueda = '';
+      filtroEstado = 'Todos';
+      filtroPrioridad = 'Todas';
+    });
+  }
+
+  //dropdown de los filtros, lo hice función porque los dos son iguales y sólo cambia la lista
+  Widget filtro(String etiqueta, String valor, List<String> opciones, ValueChanged<String> cambiar) {
+    return DropdownButtonFormField<String>(
+      value: valor,
+      decoration: InputDecoration(labelText: etiqueta, border: const OutlineInputBorder(), isDense: true),
+      items: opciones.map((o) => DropdownMenuItem(value: o, child: Text(o))).toList(),
+      onChanged: (v) => setState(() => cambiar(v ?? opciones.first)),
+    );
   }
 
   Future<void> cargar() async {
@@ -91,7 +123,9 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
 
   @override
   Widget build(BuildContext context) {
-    final items = g.buscar(busqueda);
+    //ahora la lista sale de filtrar, que usa el texto y los dos filtros al mismo tiempo
+    //los contadores de arriba siguen usando contar sobre toda la lista, así no dependen de los filtros (bug 3)
+    final items = g.filtrar(busqueda, filtroEstado, filtroPrioridad);
     return Scaffold(
       appBar: AppBar(
         title: const Text('NexaSoft | Incidencias'),
@@ -158,6 +192,7 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 5),
                           child: TextField(
+                            controller: buscador,
                             decoration: const InputDecoration(
                               labelText: 'Buscar incidencias',
                               hintText: 'Ejemplo: WiFi, correo, pantalla',
@@ -166,6 +201,27 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                             ),
                             onChanged: (texto) => setState(() => busqueda = texto),
                           ),
+                        ),
+                        //fila con los filtros de estado y prioridad y el botón para limpiar todo
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 5),
+                          child: Row(children: [
+                            Expanded(
+                              child: filtro('Estado', filtroEstado,
+                                  ['Todos', 'Pendiente', 'En proceso', 'Resuelta'], (v) => filtroEstado = v),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: filtro('Prioridad', filtroPrioridad,
+                                  ['Todas', ...Incidencia.prioridades], (v) => filtroPrioridad = v),
+                            ),
+                            const SizedBox(width: 10),
+                            OutlinedButton.icon(
+                              onPressed: limpiarFiltros,
+                              icon: const Icon(Icons.filter_alt_off_outlined),
+                              label: const Text('Limpiar'),
+                            ),
+                          ]),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
@@ -176,7 +232,17 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                         ),
                         Expanded(
                           child: items.isEmpty
-                              ? const Center(child: Text('No se encontraron incidencias'))
+                              //cuando no hay resultados se explica por qué y se da la opción de limpiar ahí mismo
+                              ? Center(
+                                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                    const Icon(Icons.search_off, size: 40, color: Colors.black45),
+                                    const SizedBox(height: 8),
+                                    const Text('No se encontraron incidencias con esa búsqueda y esos filtros',
+                                        textAlign: TextAlign.center),
+                                    const SizedBox(height: 8),
+                                    TextButton(onPressed: limpiarFiltros, child: const Text('Limpiar búsqueda y filtros')),
+                                  ]),
+                                )
                               : ListView.builder(
                                   padding: const EdgeInsets.only(left: 12, right: 12, bottom: 100),
                                   itemCount: items.length,
