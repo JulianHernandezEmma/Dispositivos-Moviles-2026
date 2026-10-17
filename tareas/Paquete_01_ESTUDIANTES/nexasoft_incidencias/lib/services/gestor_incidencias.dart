@@ -101,8 +101,27 @@ class GestorIncidencias {
         "Lo que quedó en el almacén: ${(await datos.leer()).map((x) => '${x.id}:${x.estado}').toList()}"); //se guardó correctamente en el almacén?*/
   }
 
+  //Función que cambia la prioridad de cada incidencia, para la FEAT-001
+  //Espera la id de la incidencia y la prioridad nueva, es casi igual a cambiarEstado
+  //y también guarda la lista con await para que no se pierda al cerrar la app como en el bug 1
+  Future<void> cambiarPrioridad(String id, String prioridad) async {
+    //si llega algo que no es Baja, Media o Alta no se guarda y manda error
+    if (!Incidencia.prioridades.contains(prioridad)) {
+      throw ArgumentError('Prioridad no válida: $prioridad');
+    }
+    final item = porId(id);
+    if (item == null) return;
+    item.prioridad = prioridad;
+    await datos.guardar(incidencias);
+  }
+
+  //ahora también recibe la prioridad que se eligió en el formulario
   Future<void> crear(String titulo, String descripcion, String cliente,
-      String categoria) async {
+      String categoria, String prioridad) async {
+    //misma validación que en cambiarPrioridad, sólo deja pasar las 3 prioridades
+    if (!Incidencia.prioridades.contains(prioridad)) {
+      throw ArgumentError('Prioridad no válida: $prioridad');
+    }
     final nuevo = Incidencia(
       id: 'INC-${DateTime.now().microsecondsSinceEpoch}',
       titulo: titulo,
@@ -111,6 +130,7 @@ class GestorIncidencias {
       categoria: categoria,
       estado: 'Pendiente',
       fecha: DateTime.now().toIso8601String().split('T').first,
+      prioridad: prioridad,
     );
     incidencias.insert(0, nuevo);
     await datos.guardar(incidencias);

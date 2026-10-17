@@ -42,6 +42,13 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
     return const Color(0xFFAC4052);
   }
 
+  //color de la etiqueta de la prioridad, igual que como se hace con colorEstado
+  Color colorPrioridad(String prioridad) {
+    if (prioridad == 'Alta') return const Color(0xFFC62828);
+    if (prioridad == 'Media') return const Color(0xFFB56B13);
+    return const Color(0xFF546E7A);
+  }
+
   Widget resumen(String etiqueta, String valor, IconData icono) {
     return Expanded(
       child: Card(
@@ -187,9 +194,23 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                                             children: [
                                               Text('${item.id}  ·  ${item.cliente}'),
                                               const SizedBox(height: 6),
-                                              Text(item.estado, style: TextStyle(
-                                                color: colorEstado(item.estado), fontWeight: FontWeight.bold,
-                                              )),
+                                              //se puso el estado en un Row para que a un lado salga la prioridad como etiqueta
+                                              Row(children: [
+                                                Text(item.estado, style: TextStyle(
+                                                  color: colorEstado(item.estado), fontWeight: FontWeight.bold,
+                                                )),
+                                                const SizedBox(width: 10),
+                                                Chip(
+                                                  label: Text(item.prioridad),
+                                                  labelStyle: TextStyle(
+                                                    color: colorPrioridad(item.prioridad), fontSize: 12, fontWeight: FontWeight.w600,
+                                                  ),
+                                                  side: BorderSide(color: colorPrioridad(item.prioridad)),
+                                                  backgroundColor: colorPrioridad(item.prioridad).withValues(alpha: 0.08),
+                                                  visualDensity: VisualDensity.compact,
+                                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                                ),
+                                              ]),
                                             ],
                                           ),
                                         ),
